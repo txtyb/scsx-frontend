@@ -6,7 +6,7 @@ import LineChart from './components/LineChart.vue'
 import { onBeforeMount, onMounted, ref, h, VNode, VNodeTypes } from 'vue'
 import { reference } from '@popperjs/core';
 
-const dataNum = ref('100')
+const dataNum = ref(100)
 const devEui = ref('009569000000F51D')
 const typeVal = ref(0)
 const changeHandler = (e: number) => (typeVal.value = e)
@@ -32,8 +32,8 @@ let chartTypeList = ref<Array<number>>(new Array())
 // chartTypeList.value = [3, 2, 1, 0]
 
 let chartGrid = h(
-  LineChart, {data: chartData.value, type: 3}
-  )
+  LineChart, { data: chartData.value, type: 3 }
+)
 
 function genDate(data: Array<any>) {
   // console.log(data.length)
@@ -44,23 +44,26 @@ function genDate(data: Array<any>) {
 }
 
 async function refresh() {
-  let url = 'http://localhost:5000/api/getDevice?devEui=' + devEui.value + '&n=' + dataNum.value
-  try {
-    let response = await fetch(url, {
-      method: "get",
-    });
-    chartData.value = await response.json()
-    // console.log(`get data=${chartData.value}`)
-  } catch (error) {
-    console.log('get data failed', error)
+  for (let i = 0; i < chartDataList.value.length; i++) {
+    let url = 'http://localhost:5000/api/getDevice?devEui=' + devEui.value + '&n=' + dataNum.value + '&type=' + chartTypeList.value[i]
+    try {
+      let response = await fetch(url, {
+        method: "get",
+      });
+      chartDataList.value[i].value = await response.json()
+      // console.log(`get data=${chartData.value}`)
+    } catch (error) {
+      console.log('get data failed', error)
+    }
+    console.log('refresh done!')
+    genDate(chartDataList.value[i].value)
+    // console.log(`after gen=${chartData.value}`)
   }
-  console.log('refresh done!')
-  genDate(chartData.value)
-  // console.log(`after gen=${chartData.value}`)
 }
 
 async function test() {
-  console.log(chartTypeList.value);
+  console.log(`chartTypeList=${chartTypeList.value.toLocaleString()}`);
+  console.log(`chartDataList=${chartDataList.value.toLocaleString()}`);
 }
 
 async function handleTest() {
@@ -70,11 +73,14 @@ async function handleTest() {
 
 async function addChart() {
   chartTypeList.value.push(typeVal.value)
+  let data = ref<Array<any>>([])
+  chartDataList.value.push(data)
 }
 
 async function handleAddButtonClick() {
   await refresh()
   await addChart()
+  await handleTest()
   await test()
 }
 
@@ -89,39 +95,39 @@ onMounted(() => {
   handleTest()
 })
 
-const a = 1
-
 </script>
 
 <template>
-  <div>
-    <fe-row gutter="5" justify="start">
-      <fe-col :span="7"><span style="font-weight: bold; font-size: 25px">图表汇总</span></fe-col>
-      <fe-col :span="8">
-        <fe-slider style="margin-top: 14px" v-model="dataNum" :max="300" />
-      </fe-col>
-      <fe-spacer :x=2 />
-      <fe-col :span="0.5">
-        <fe-button type="success" @click="handleRefreshButtonClick">刷新</fe-button>
-      </fe-col>
-      <fe-col :span="2">
-        <fe-input placeholder="devEui" v-model="devEui" />
-      </fe-col>
-      <fe-col :span="1">
-        <fe-select :value="typeVal" @change="changeHandler">
-          <fe-option label="光照" :value="0"></fe-option>
-          <fe-option label="温度" :value="1"></fe-option>
-          <fe-option label="湿度" :value="2"></fe-option>
-          <fe-option label="气压" :value="3"></fe-option>
-        </fe-select>
-      </fe-col>
-      <fe-spacer :x=10 />
-      <fe-col :span="1">
-        <fe-button style="margin-top:2px" type="success" size="small" ghost @click="handleAddButtonClick">添加</fe-button>
-      </fe-col>
-    </fe-row>
-  </div>
-  <fe-grid-group :gap="2" justify="left">
+  <fe-grid-group :gap="1" justify="flex-start" alignItems="center">
+    <fe-grid :md="5"><span style="font-weight: bold; font-size: 25px">图表汇总</span></fe-grid>
+    <fe-grid :md="5">
+      <fe-slider v-model="dataNum" :max="300" @click="refresh" />
+    </fe-grid>
+    <!-- <fe-spacer :x=2 /> -->
+    <fe-grid :md="1">
+      <fe-button auto type="success" @click="handleRefreshButtonClick">刷新</fe-button>
+    </fe-grid>
+    <fe-grid :md="2" justify="flex-end">
+      <span>devEui</span>
+    </fe-grid>
+    <fe-grid :md="2">
+      <fe-input placeholder="devEui" v-model="devEui" />
+    </fe-grid>
+    <fe-grid :md="3">
+      <fe-select width="5" :value="typeVal" @change="changeHandler">
+        <fe-option label="光照" :value="0"></fe-option>
+        <fe-option label="温度" :value="1"></fe-option>
+        <fe-option label="湿度" :value="2"></fe-option>
+        <fe-option label="气压" :value="3"></fe-option>
+      </fe-select>
+    </fe-grid>
+    <!-- <fe-spacer :x=3 /> -->
+    <fe-grid :md="1">
+      <fe-button auto style="margin-top:2px" type="success" size="small" ghost @click="handleAddButtonClick">添加
+      </fe-button>
+    </fe-grid>
+  </fe-grid-group>
+  <fe-grid-group :gap="2" justify="flex-start">
     <!-- <fe-grid :xs="24" :md="12">
       <fe-card class="chart" shadow>
         <img alt="Vue logo" src="./assets/logo.png" />
@@ -140,7 +146,7 @@ const a = 1
     </fe-grid> -->
     <fe-grid v-for="(i, index) in chartTypeList" :xs="24" :md="12">
       <fe-card class="chart" shadow>
-        <LineChart :data="chartData" :options="options" :type="i" :key="index" />
+        <LineChart :data="chartDataList[index].value" :options="options" :type="i" :key="index" />
       </fe-card>
     </fe-grid>
   </fe-grid-group>
