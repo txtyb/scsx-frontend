@@ -1,21 +1,25 @@
 <script setup lang="ts">
 import { defineComponent, h } from 'vue';
 
+import '@fect-ui/themes'
+import EditAndClosePanel from './EditAndClosePanel.vue'
+
 import { GChart } from 'vue-google-charts';
 
-  const props = defineProps({
-    data: {
-      type: Array<any>,
-      required: true,
-    },
-    options: {
-      type: Object,
-    },
-    type: {
-      type: Number, 
-      required: true, 
-    }, 
-  })
+const props = defineProps({
+  data: {
+    type: Array<any>,
+    required: true,
+  },
+  options: {
+    type: Object,
+  },
+  type: {
+    type: Number,
+    required: true,
+  },
+  modelValue: Array<String>,
+})
 
 const chartTypes = ['光照', '温度', '湿度', '气压']
 const options = {
@@ -24,11 +28,11 @@ const options = {
   // explorer: {}, 
   legend: { position: 'top' },
   chartArea: {
-    left: 40, 
-    top: 40, 
-    width: '95%', 
-    height: '85%', 
-  }, 
+    left: 55,
+    top: 42,
+    width: '95%',
+    height: '85%',
+  },
   // width: 1000,
   height: 450,
 };
@@ -51,7 +55,11 @@ const optionsMerged = Object.assign({}, options, props.options)
 
 <template>
   <!-- <chart /> -->
-  <GChart class="gchart" :settings="{ 'language': 'zh' }" type="LineChart" :data="props.data" :options="optionsMerged" />
+  <div style="position:relative">
+    <GChart class="gchart" :settings="{ 'language': 'zh' }" type="LineChart" :data="props.data"
+      :options="optionsMerged" />
+  <EditAndClosePanel @close="$emit('close')"></EditAndClosePanel>
+  </div>
 </template>
 
 <style scoped>
