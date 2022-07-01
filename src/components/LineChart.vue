@@ -6,6 +6,8 @@ import EditAndClosePanel from './EditAndClosePanel.vue'
 
 import { GChart } from 'vue-google-charts';
 
+const emit = defineEmits(['close'])
+
 const props = defineProps({
   data: {
     type: Array<any>,
