@@ -1,6 +1,4 @@
 <script setup lang="ts">
-// This starter template is using Vue 3 <script setup> SFCs
-// Check out https://vuejs.org/api/sfc-script-setup.html#script-setup
 import LineChart from './components/LineChart.vue'
 import { onBeforeMount, onMounted, ref, h } from 'vue'
 
@@ -32,18 +30,27 @@ class ChartDataObject {
   data: Array<any>
   options: object
   type: number
-  devEui: string
+  devEui: Array<string>
   id: number
+  url: string
 
   constructor(data: Array<any>, options: Object, type: number, devEui: string, keyId: number) {
     this.data = data
     this.options = options
     this.type = type
-    this.devEui = devEui
+    this.devEui = []
+    this.devEui.push(devEui)
+    console.log(`this.devEui=${this.devEui}`)
     this.id = keyId
+    this.url=''
   }
   async refresh() {
-    let url = 'http://localhost:5000/api/getDevice?devEui=' + this.devEui + '&n=' + dataNum.value + '&type=' + this.type
+    let devEuiParams = ''
+    for (let i of this.devEui) {
+      devEuiParams += `&devEui=${i}`
+    }
+    console.log(`devEuiParams=${devEuiParams}`)
+    let url = 'http://localhost:5000/api/getDevice' + '?n=' + dataNum.value + '&type=' + this.type + devEuiParams
     try {
       let response = await fetch(url, {
         method: "get",
@@ -56,6 +63,16 @@ class ChartDataObject {
     console.log('refresh done!')
     genDate(this.data)
     // console.log(`after gen=${chartData.value}`)
+  }
+  updateDevEuiList = async (newDevEui: string) => {
+    console.log('Add new devEui!')
+    console.log(`newDevEui=${newDevEui}`)
+    console.log(`this.devEui=${this.devEui}`)
+    this.devEui.push(newDevEui)
+  }
+  updateUrl = async (url: string) => {
+    this.url = url
+    console.log('image url returned.')
   }
 }
 
@@ -125,8 +142,8 @@ async function addChart() {
 async function handleAddButtonClick() {
   await addChart()
   await refresh()
-  await handleTest()
-  await test()
+  // await handleTest()
+  // await test()
 }
 
 async function handleRefreshButtonClick() {
@@ -178,7 +195,8 @@ onMounted(() => {
   <fe-grid-group :gap="2" justify="flex-start">
     <fe-grid v-for="(i, index) in chartObjectList" :xs="24" :md="12">
       <fe-card class="chart" shadow>
-        <LineChart :data="i.data" :options="i.options" :type="i.type" :key="i.id" @close="chartObjectList.splice(index, 1)" />
+        <LineChart :data="i.data" :options="i.options" :type="i.type" :key="i.id"
+          @close="chartObjectList.splice(index, 1)" @add-new-node="i.updateDevEuiList" @return-url="i.updateUrl" />
       </fe-card>
     </fe-grid>
   </fe-grid-group>

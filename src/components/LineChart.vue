@@ -6,7 +6,7 @@ import EditAndClosePanel from './EditAndClosePanel.vue'
 
 import { GChart } from 'vue-google-charts';
 
-const emit = defineEmits(['close'])
+const emit = defineEmits(['close', 'addNewNode', 'returnUrl'])
 
 const props = defineProps({
   data: {
@@ -37,9 +37,17 @@ const options = {
   },
   // width: 1000,
   height: 450,
+  interpolateNulls: true,
 };
 
 const optionsMerged = Object.assign({}, options, props.options)
+
+async function getImageUrl(chart: any, google: any) {
+  await new Promise(r => setTimeout(r, 1000));
+  let url = chart.getImageURI()
+  // console.log(`ImageUrl=${url}`)
+  emit('returnUrl', url)
+}
 
 // const data = ref<Array<any>[]>(props.data)
 // console.log(data)
@@ -58,9 +66,9 @@ const optionsMerged = Object.assign({}, options, props.options)
 <template>
   <!-- <chart /> -->
   <div style="position:relative">
-    <GChart class="gchart" :settings="{ 'language': 'zh' }" type="LineChart" :data="props.data"
-      :options="optionsMerged" />
-  <EditAndClosePanel @close="$emit('close')"></EditAndClosePanel>
+    <GChart class="gchart" :settings="{ 'language': 'zh' }" type="LineChart" :data="props.data" :options="optionsMerged"
+      @ready="getImageUrl" />
+    <EditAndClosePanel @close="$emit('close')" @add-new-node="(devEui: string) => $emit('addNewNode', devEui)" />
   </div>
 </template>
 
