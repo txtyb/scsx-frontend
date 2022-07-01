@@ -42,7 +42,7 @@ class ChartDataObject {
     this.devEui.push(devEui)
     console.log(`this.devEui=${this.devEui}`)
     this.id = keyId
-    this.url=''
+    this.url = ''
   }
   async refresh() {
     let devEuiParams = ''
@@ -70,9 +70,18 @@ class ChartDataObject {
     console.log(`this.devEui=${this.devEui}`)
     this.devEui.push(newDevEui)
   }
+  handleAddNewNode = async (newDevEui: string) => {
+    await this.updateDevEuiList(newDevEui)
+    await new Promise(r => setTimeout(r, 500))
+    await this.refresh()
+  }
   updateUrl = async (url: string) => {
     this.url = url
     console.log('image url returned.')
+  }
+  openImageUrl = () => {
+    let newTab = window.open()
+    newTab!.document.body.innerHTML = `<img src="${this.url}">`;
   }
 }
 
@@ -196,7 +205,8 @@ onMounted(() => {
     <fe-grid v-for="(i, index) in chartObjectList" :xs="24" :md="12">
       <fe-card class="chart" shadow>
         <LineChart :data="i.data" :options="i.options" :type="i.type" :key="i.id"
-          @close="chartObjectList.splice(index, 1)" @add-new-node="i.updateDevEuiList" @return-url="i.updateUrl" />
+          @close="chartObjectList.splice(index, 1)" @add-new-node="i.handleAddNewNode" @return-url="i.updateUrl"
+          @open-chart-image="i.openImageUrl" />
       </fe-card>
     </fe-grid>
   </fe-grid-group>

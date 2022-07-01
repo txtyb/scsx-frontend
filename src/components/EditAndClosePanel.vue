@@ -2,24 +2,29 @@
 import { ref } from 'vue'
 import '@fect-ui/themes'
 import { Button, ButtonGroup, Modal } from '@fect-ui/vue'
-import { Edit3, X } from '@fect-ui/vue-icons'
+import { Edit3, X, Save } from '@fect-ui/vue-icons'
 
-const emit = defineEmits(['close', 'addNewNode'])
+const emit = defineEmits(['close', 'addNewNode', 'openChartImage'])
 
 const show = ref(false)
 const handlerClick = () => (show.value = true)
 const formValue = ref({
-  type: 0, 
-  devEui: '', 
+  type: 0,
+  devEui: '',
 })
 
 </script>
 
 <template>
-  <ButtonGroup style="position:absolute; right:-10px; top:-10px" size="small">
+  <ButtonGroup style="position:absolute; right:-15px; top:-15px" size="small">
     <Button auto @click="handlerClick">
       <template #icon>
         <Edit3 />
+      </template>
+    </Button>
+    <Button auto @click="$emit('openChartImage')">
+      <template #icon>
+        <Save />
       </template>
     </Button>
     <Button auto @click="$emit('close')">
