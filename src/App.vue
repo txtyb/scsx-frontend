@@ -50,7 +50,7 @@ class ChartDataObject {
       devEuiParams += `&devEui=${i}`
     }
     console.log(`devEuiParams=${devEuiParams}`)
-    let url = 'http://localhost:5000/api/getDevice' + '?n=' + dataNum.value + '&type=' + this.type + devEuiParams
+    let url = 'https://scsx-serverless.vercel.app/api/getDevice' + '?n=' + dataNum.value + '&type=' + this.type + devEuiParams
     try {
       let response = await fetch(url, {
         method: "get",
